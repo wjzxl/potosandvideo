@@ -150,7 +150,7 @@ class WJSomePhotoDetailsViewController: UIViewController,UICollectionViewDelegat
         print("the nnumber tag:%d",indexPath.row)
         
         let bigPicView = WJShowTheBigPicViewController()
-        bigPicView.curentTheDataWith = indexPath.row + 1
+        bigPicView.curentTheDataWith = indexPath.row
         bigPicView.allDataArr = dataAllArr
         self.navigationController?.pushViewController(bigPicView, animated: true)
         

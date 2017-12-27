@@ -19,13 +19,17 @@ class WJShowTheBigPicViewController: UIViewController,UIScrollViewDelegate {
     
     var imageMangerONe:PHCachingImageManager!
     
+    var leftBigViewImg:UIImageView!
+    var centerBigViewImg:UIImageView!
+    var rightBigViewImg:UIImageView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
         
         self.view.backgroundColor = UIColor.white
-        self.title = curentTheDataWith.description + "/" + allDataArr.count.description
+        self.title = (curentTheDataWith+1).description + "/" + allDataArr.count.description
         
         self.automaticallyAdjustsScrollViewInsets = false
         
@@ -36,37 +40,70 @@ class WJShowTheBigPicViewController: UIViewController,UIScrollViewDelegate {
         mainscrollView.backgroundColor = UIColor.black
         mainscrollView.showsVerticalScrollIndicator = false
         mainscrollView.showsHorizontalScrollIndicator = false
-        mainscrollView.scrollsToTop = false
         mainscrollView.isPagingEnabled = true
-        mainscrollView.contentSize = CGSize.init(width: (self.view.frame.size.width * CGFloat(allDataArr.count)), height: self.view.frame.size.height)
+        let jdjd = self.allDataArr.count >= 3 ? 3 : self.allDataArr.count
+        mainscrollView.contentSize = CGSize.init(width: (self.view.frame.size.width * CGFloat(jdjd)), height: self.view.frame.size.height)
         self.view.addSubview(mainscrollView)
         
         initWitTheContentwithData()
         
-        if curentTheDataWith != 1 {
-           mainscrollView.contentOffset.x = self.view.frame.size.width * CGFloat(curentTheDataWith-1)
-        }
-        
-        
+//        if curentTheDataWith != 0 {
+//           mainscrollView.contentOffset.x = self.view.frame.size.width * CGFloat(curentTheDataWith)
+//        }
     }
     
     func initWitTheContentwithData() {
-        for i in 0..<allDataArr.count {
-            
-            let phasset = allDataArr[i]
-            
-           let bigpicview = UIImageView.init(frame: CGRect.init(x: self.view.frame.size.width * CGFloat(i), y: 0, width: self.view.frame.size.width, height: self.view.frame.size.height))
-            bigpicview.backgroundColor = UIColor.clear
-            bigpicview.contentMode = .scaleAspectFit
-            bigpicview.isUserInteractionEnabled = false
-            
-            imageMangerONe.requestImageData(for: phasset, options: nil, resultHandler: { (data, namestr, orientation, infor) in
-                let imagsl = UIImage.init(data: data!)
-                bigpicview.image = self.wjfixorientationssgs(imahdhad: imagsl!)
-            })
-            
-            mainscrollView.addSubview(bigpicview)
-        }
+        
+        leftBigViewImg = UIImageView.init(frame: CGRect.init(x: self.view.frame.size.width * CGFloat(0), y: 0, width: self.view.frame.size.width, height: self.view.frame.size.height))
+        leftBigViewImg.backgroundColor = UIColor.clear
+        leftBigViewImg.contentMode = .scaleAspectFit
+        leftBigViewImg.isUserInteractionEnabled = false
+        mainscrollView.addSubview(leftBigViewImg)
+        
+
+        centerBigViewImg = UIImageView.init(frame: CGRect.init(x: self.view.frame.size.width * CGFloat(1), y: 0, width: self.view.frame.size.width, height: self.view.frame.size.height))
+        centerBigViewImg.backgroundColor = UIColor.clear
+        centerBigViewImg.contentMode = .scaleAspectFit
+        centerBigViewImg.isUserInteractionEnabled = false
+        mainscrollView.addSubview(centerBigViewImg)
+        
+        rightBigViewImg = UIImageView.init(frame: CGRect.init(x: self.view.frame.size.width * CGFloat(2), y: 0, width: self.view.frame.size.width, height: self.view.frame.size.height))
+        rightBigViewImg.backgroundColor = UIColor.clear
+        rightBigViewImg.contentMode = .scaleAspectFit
+        rightBigViewImg.isUserInteractionEnabled = false
+        mainscrollView.addSubview(rightBigViewImg)
+        
+        chnageTheUIImage(selsecIndex: curentTheDataWith)
+
+    }
+    
+    func chnageTheUIImage(selsecIndex:Int) {
+        
+        let oneindex = (selsecIndex-1+self.allDataArr.count) % allDataArr.count
+        let phasset0 = allDataArr[oneindex]
+        imageMangerONe.requestImageData(for: phasset0, options: nil, resultHandler: { (data, namestr, orientation, infor) in
+            let imagsl = UIImage.init(data: data!)
+            self.leftBigViewImg.image = nil
+            self.leftBigViewImg.image = self.wjfixorientationssgs(imahdhad: imagsl!)
+        })
+        
+        let oneindex1 = (selsecIndex+1+self.allDataArr.count) % allDataArr.count
+        let phasset1 = allDataArr[oneindex1]
+        imageMangerONe.requestImageData(for: phasset1, options: nil, resultHandler: { (data, namestr, orientation, infor) in
+            let imagsl = UIImage.init(data: data!)
+            self.rightBigViewImg.image = nil
+            self.rightBigViewImg.image = self.wjfixorientationssgs(imahdhad: imagsl!)
+        })
+        
+        
+        let phasset = allDataArr[selsecIndex]
+        imageMangerONe.requestImageData(for: phasset, options: nil, resultHandler: { (data, namestr, orientation, infor) in
+            let imagsl = UIImage.init(data: data!)
+            self.centerBigViewImg.image = nil
+            self.centerBigViewImg.image = self.wjfixorientationssgs(imahdhad: imagsl!)
+            self.mainscrollView.contentOffset = CGPoint.init(x: self.view.frame.size.width, y: 0)
+        })
+        
     }
     
     func wjfixorientationssgs(imahdhad:UIImage) -> UIImage {
@@ -131,9 +168,27 @@ class WJShowTheBigPicViewController: UIViewController,UIScrollViewDelegate {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let indespage = Int(scrollView.contentOffset.x/self.view.frame.size.width) + 1
+    
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        reloadImage()
+        self.title = (curentTheDataWith + 1).description + "/" + allDataArr.count.description
+    }
+    
+    func reloadImage() {
         
-         self.title = indespage.description + "/" + allDataArr.count.description
+        let contenoffset = mainscrollView.contentOffset
+        
+        if contenoffset.x > self.view.frame.size.width {
+            curentTheDataWith = (curentTheDataWith + 1) % allDataArr.count
+        }
+        else if contenoffset.x < self.view.frame.size.width {
+            curentTheDataWith = (curentTheDataWith - 1 + allDataArr.count) % allDataArr.count
+        }
+        
+        chnageTheUIImage(selsecIndex: curentTheDataWith)
+
     }
     
     override func didReceiveMemoryWarning() {
